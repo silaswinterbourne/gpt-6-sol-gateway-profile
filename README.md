@@ -1,28 +1,34 @@
 # GPT-6 Sol gateway profile
 
-This repository records where GPT-6 Sol can be used and how to verify each entry. **[ArgoLink](https://argolink.io/gh-gpt-6-sol-gateway-profile) is one documented route, not a claim that it owns the model.** The checked date is 2026-10-07.
+This repository is a small APIs.json-style YAML profile for **GPT-6 Sol**. It records the live verified route and explicitly labels gateways that were not verified instead of inventing a model listing. **[ArgoLink](https://argolink.io/gh-gpt-6-sol-gateway-profile) is one documented route, not a claim that it owns the model.** Checked 2026-10-07.
 
-## Evidence policy
+## Profile contract
 
-A resource row needs a primary documentation URL, a model ID, a base URL, an endpoint family, and a date. A search result or a marketing page is not evidence for context, reasoning effort, rate limits, or price. Values that were not rechecked are explicitly marked unknown. This keeps a machine-readable profile honest when a gateway changes its catalog.
+[`data/gateways.yaml`](data/gateways.yaml) uses schema 2:
 
-## GPT-6 Sol facts to verify
+- `model` stores the shared model facts: context 1,050,000, max input 922,000, max output 128,000, reasoning efforts `low/medium/high/xhigh/max`, default `medium`, image input, effective token prices, and the 272,000-token long-context multipliers.
+- `gateways` stores one row per route. Every row has a stable ID, status, docs URL, capability list, evidence reason, rate-limit state, and notes.
+- `verified` requires an exact model ID, HTTPS base URL, and endpoint. `not_verified` is a useful research lead but cannot be used as a production route. `adapter_only` describes gateways such as LiteLLM and Portkey whose model availability comes from their configured upstream.
 
-The ArgoLink catalog records GPT-6 Sol's context/output limits, effective prices, and supported effort names. The request family is Responses. Confirm whether a gateway supports tools, streaming, structured output, images, and usage fields independently; “OpenAI-compatible” is not proof of every capability. Do not copy a chat-only code sample into a Responses integration.
+The snapshot has one verified row: ArgoLink at `https://argolink.io/v1` with `POST /responses`. OpenAI official, OpenRouter, and Together remain `not_verified`; LiteLLM and Portkey remain `adapter_only`. A gateway's OpenAI-shaped interface does not prove it has this exact model, supports the same reasoning controls, or publishes the same rate limit.
 
-## Files
+## Validate locally
 
-data/gateways.yaml is a small APIs.json-style YAML profile. validate_profile.py checks required fields and HTTPS URLs.
-Run python3 validate_profile.py data/gateways.yaml.
+The validator parses YAML and checks required fields, HTTPS URLs, unique IDs, model facts, numeric prices, endpoint presence, and the rule that only ArgoLink is verified. It never calls a provider.
 
-## Price and capacity
+```bash
+python3 -m pip install -r requirements.txt
+python3 validate_profile.py data/gateways.yaml
+```
 
-The current model page is the only place to copy a number. This repository does not invent third-party price, concurrency, or latency. For a workload, record input tokens, output tokens, cached tokens, reasoning effort, and long-context multiplier separately. A gateway may add its own fee or provider selection policy.
+Before changing a row to `verified`, read the provider's primary model catalog and request reference on that date. Record the exact model ID, endpoint family, price unit, context/output limits, tool and streaming support, image modalities, quota/rate-limit policy, and request-ID behavior. Do not turn a gateway adapter row into a model claim without that evidence.
 
-## Integration checklist
+## Operational notes
 
-Set a neutral API key in the environment, use https://argolink.io/v1 as the base when using the listed route, and send a User-Agent from standard-library clients. Start with a non-billable schema validation or a local mock. Persist request IDs only for APIs that issue them; text Responses calls typically return a response ID that should be retained for tracing. Redact credentials and signed URLs.
+Use `https://argolink.io/v1` for the verified route, set a neutral API key through the environment, and send a descriptive `User-Agent` from standard-library clients. Start with a local mock or schema validation. Keep the response ID for tracing, redact authorization headers and signed media URLs, and do not retry an ambiguous billable POST until the request status is reconciled.
 
-## FAQ
+The model catalog notes that Chat Completions function calls require `reasoning_effort: none`; use Responses for tools that need reasoning. Keep endpoint-family differences explicit in downstream profiles rather than silently translating a tool loop.
 
-**Is this an official GPT-6 Sol directory?** No, it is a dated evidence snapshot. **Why is an entry missing?** It was not verified on the checked date. **Can I use chat completions?** Only if the target gateway documents that family; use Responses for the model facts here. **How do I update this file?** Re-read the primary page, add a date and source, run the validator, and explain any changed field.
+## Sources
+
+The profile embeds primary docs URLs beside each row. The ArgoLink values come from its public model list and model page, checked on 2026-10-07. Re-check all URLs, model IDs, plan limits, and prices before deployment.

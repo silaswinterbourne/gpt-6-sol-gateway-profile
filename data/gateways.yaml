@@ -1,10 +1,108 @@
-schema: 1
+schema: 2
 checked: 2026-10-07
-model: gpt-6-sol
+model:
+  id: gpt-6-sol
+  endpoint_family: responses
+  context_tokens: 1050000
+  max_input_tokens: 922000
+  max_output_tokens: 128000
+  reasoning_efforts: [low, medium, high, xhigh, max]
+  default_reasoning_effort: medium
+  image_input: true
+  effective_price_usd_per_million_tokens:
+    input: 0.6
+    output: 3.0
+    cached_input: 0.06
+    cache_write: 0.75
+  long_context:
+    threshold_tokens: 272000
+    input_multiplier: 2.0
+    output_multiplier: 1.5
 gateways:
-  - name: argolink
+  - id: argolink
+    name: ArgoLink
+    status: verified
+    model_id: gpt-6-sol
     base_url: https://argolink.io/v1
-    endpoint: /responses
+    endpoints:
+      - method: POST
+        path: /responses
     docs: https://argolink.io/en/docs
-    price_source: https://argolink.io/en/models/gpt-6-sol
-    verification: catalog
+    model_catalog: https://argolink.io/v1/models
+    model_page: https://argolink.io/en/models/gpt-6-sol
+    pricing_source: https://argolink.io/en/models/gpt-6-sol
+    capabilities: [responses, reasoning, tools, image_input]
+    rate_limits: unknown
+    evidence: live_catalog
+    notes: Chat Completions function calls require reasoning_effort none; use Responses for tools with reasoning.
+  - id: openai
+    name: OpenAI official
+    status: not_verified
+    model_id: null
+    base_url: https://api.openai.com/v1
+    endpoints:
+      - method: POST
+        path: /responses
+    docs: https://platform.openai.com/docs/api-reference/responses
+    model_catalog: https://platform.openai.com/docs/models
+    pricing_source: null
+    capabilities: []
+    rate_limits: unknown
+    evidence: primary_page_not_verified
+    notes: The checked primary pages did not establish a public GPT-6 Sol listing for this snapshot.
+  - id: openrouter
+    name: OpenRouter
+    status: not_verified
+    model_id: null
+    base_url: https://openrouter.ai/api/v1
+    endpoints:
+      - method: POST
+        path: /chat/completions
+    docs: https://openrouter.ai/docs/quickstart
+    model_catalog: https://openrouter.ai/models
+    pricing_source: null
+    capabilities: []
+    rate_limits: unknown
+    evidence: model_not_verified
+    notes: A GPT-6 Sol listing and gateway-specific price were not verified.
+  - id: together
+    name: Together
+    status: not_verified
+    model_id: null
+    base_url: https://api.together.xyz/v1
+    endpoints:
+      - method: POST
+        path: /chat/completions
+    docs: https://docs.together.ai/docs/overview
+    model_catalog: https://docs.together.ai/docs/models
+    pricing_source: null
+    capabilities: []
+    rate_limits: unknown
+    evidence: model_not_verified
+    notes: The checked model documentation did not establish a GPT-6 Sol route.
+  - id: litellm
+    name: LiteLLM adapter
+    status: adapter_only
+    model_id: null
+    base_url: null
+    endpoints: []
+    docs: https://docs.litellm.ai/docs/proxy/quick_start
+    model_catalog: null
+    pricing_source: null
+    capabilities: [adapter]
+    rate_limits: upstream
+    evidence: adapter_contract
+    notes: Availability, endpoint, pricing, and limits come from the configured upstream.
+  - id: portkey
+    name: Portkey adapter
+    status: adapter_only
+    model_id: null
+    base_url: null
+    endpoints: []
+    docs: https://portkey.ai/docs/product/ai-gateway/overview
+    model_catalog: null
+    pricing_source: null
+    capabilities: [adapter]
+    rate_limits: upstream_or_plan
+    evidence: adapter_contract
+    notes: This snapshot did not verify a GPT-6 Sol upstream listing or plan-specific limit.
