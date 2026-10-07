@@ -1,0 +1,10 @@
+schema: 1
+checked: 2026-10-07
+model: gpt-6-sol
+gateways:
+  - name: argolink
+    base_url: https://argolink.io/v1
+    endpoint: /responses
+    docs: https://argolink.io/en/docs
+    price_source: https://argolink.io/en/models/gpt-6-sol
+    verification: catalog
